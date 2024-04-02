@@ -6,7 +6,7 @@ import { Person } from './types/Person';
 type AppProps = {
   items: Person[];
   onSelected: (person: Person | null) => void;
-  delay: 300;
+  delay: number;
 };
 
 export const Dropdown: React.FC<AppProps> = ({ items, onSelected, delay }) => {
@@ -45,11 +45,16 @@ export const Dropdown: React.FC<AppProps> = ({ items, onSelected, delay }) => {
     );
   }, [appliedQuery, items]);
 
-  const isNotFound = !filteredPeople.length;
+  const isNotFound =
+    !filteredPeople.length && inputFocused && appliedQuery !== '';
 
   return (
     <>
-      <div className={cn('dropdown', { 'is-active': inputFocused })}>
+      <div
+        className={cn('dropdown', {
+          'is-active': inputFocused && appliedQuery === query,
+        })}
+      >
         <div className="dropdown-trigger">
           <input
             type="text"
@@ -62,41 +67,39 @@ export const Dropdown: React.FC<AppProps> = ({ items, onSelected, delay }) => {
             data-cy="search-input"
           />
         </div>
-
-        <div className="dropdown-menu" role="menu" data-cy="suggestions-list">
-          {!isNotFound && (
-            <div className="dropdown-content">
-              {filteredPeople.map(person => (
-                // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-                <div
-                  className="dropdown-item"
-                  data-cy="suggestion-item"
-                  key={person.slug}
-                  onClick={() => handleSuggestionClick(person)}
-                  tabIndex={0}
-                  role="button"
-                >
-                  <p
-                    className={cn({
-                      'has-text-link': person.sex === 'm',
-                      'has-text-danger': person.sex === 'f',
-                    })}
+        {inputFocused && appliedQuery === query && (
+          <div className="dropdown-menu" role="menu" data-cy="suggestions-list">
+            {!isNotFound && (
+              <div className="dropdown-content">
+                {filteredPeople.map(person => (
+                  // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+                  <div
+                    className="dropdown-item"
+                    data-cy="suggestion-item"
+                    key={person.slug}
+                    onClick={() => handleSuggestionClick(person)}
+                    tabIndex={0}
+                    role="button"
                   >
-                    {person.name}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+                    <p
+                      className={cn({
+                        'has-text-link': person.sex === 'm',
+                        'has-text-danger': person.sex === 'f',
+                      })}
+                    >
+                      {person.name}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
       {isNotFound && (
         <div
-          className="notification
-           is-danger
-           is-light
-           mt-3
-           is-align-self-flex-start"
+          // eslint-disable-next-line max-len
+          className="notification is-danger is-light mt-3 is-align-self-flex-start"
           role="alert"
           data-cy="no-suggestions-message"
         >
